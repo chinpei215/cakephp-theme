@@ -47,3 +47,15 @@ cake theme install Cake3
 ```
 
 現在は Cake3 テーマのみをサポートしています。
+
+## 注意事項
+
+Theme プラグインをインストールすると bake コマンド実行時、 `--theme` オプションを指定しない限り、どのテーマを使用するかを尋ねられるようになります。
+Cake3 テーマを選択して bake を行ってください。
+
+```
+1. Cake3
+2. default
+Which bake theme would you like to use? (1/2)
+[1] >
+```
