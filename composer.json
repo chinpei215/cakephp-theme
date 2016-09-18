@@ -1,0 +1,13 @@
+{
+	"name": "chinpei215/cakephp-theme",
+	"description": "CakePHP 2.x plugin for using CakePHP 3.x theme",
+	"type": "cakephp-plugin",
+	"homepage": "https://github.com/chinpei215/cakephp-theme",
+	"license": "MIT",
+	"require": {
+		"composer/installers": "*"
+	},
+	"extra": {
+		"installer-name": "Theme"
+	}
+}
