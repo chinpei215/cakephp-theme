@@ -1,10 +1,9 @@
 <?php
-
-App::uses('Shell', 'Console');
+App::uses('AppShell', 'Console/Command');
 App::uses('Inflector', 'Utility');
 App::uses('Folder', 'Utility');
 
-class ThemeShell extends Shell
+class ThemeShell extends AppShell
 {
 	public function getOptionParser() {
 		$parser = parent::getOptionParser();
