@@ -27,35 +27,79 @@ php composer.phar require chinpei215/cakephp-theme
 
 ## セットアップ
 
-**app/Config/bootstrap.php** ファイルの中でプラグインを有効化してください。
+### プラグインの読込
+**app/Config/bootstrap.php** の中でプラグインを有効化してください。
 
 ```php
 CakePlugin::load('Theme', ['bootstrap' => true]);
 ```
 
 テーマをコントローラに反映させるために `bootstrap` オプションには真を指定してください。
-Theme プラグインの bootstrap には、テーマが常に有効になるための設定が含まれています。
+Theme プラグインの bootstrap には、テーマを常に有効にするための設定が含まれています。
 
-通常、テーマを有効にする場合には コントローラ中で `$theme` プロパティにテーマ名を設定しますが、
-その方法では、コントローラがインスタンス化される前に発生したエラーにはテーマが反映されません。
+### ThemeAppShell の継承
 
-プラグインを読み込んだ後、以下のコマンドを実行して Cake3 テーマをインストールしてください。
-**app/View/Themed** ディレクトリにテーマがコピーされます。
+**app/Console/Commannd/AppShell.php** を変更して `AppShell` を `ThemeAppShell` の派生クラスに変更してください。
+
+```php
+App::uses('ThemeAppShell', 'Theme.Console/Command');
+
+class AppShell extends ThemeAppShell {
+}
+```
+
+### テーマのインストール
+
+以下のコマンドを実行してテーマをインストールしてください。
+既定では **app/View/Themed** ディレクトリ配下に Cake3 テーマがコピーされます。
 
 ```sh
-cake theme install Cake3
+cake theme install
 ```
 
-現在は Cake3 テーマのみをサポートしています。
+もしも、テーマとしてインストールをするのではなく **app/View** および **app/webroot** を上書きしたい場合は、
+**app/Config/bootstrap.php** の中で `Theme.useThemePath` に偽を指定した後に上記のコマンドを実行してください。
 
-## 注意事項
+```php
+Configure::write('Theme.useThemePath', false);
+```
 
-Theme プラグインをインストールすると bake コマンド実行時、 `--theme` オプションを指定しない限り、どのテーマを使用するかを尋ねられるようになります。
-Cake3 テーマを選択して bake を行ってください。
+### ビューの bake
+
+bake コマンドを実行して必要なビューを作成してください。
+
+```sh
+cake bake view Users
+```
+
+上述の `Theme.useThemePath` に偽が指定されていない限り、ビューは Themed ディレクトリ配下に作成されます。
+
+## 高度な使用方法
+
+### テーマの無効化
+
+`Theme.useThemePath` が有効になっていると、コントローラの `$theme` プロパティが `null` の場合に、
+自動的に Cake3 テーマが設定されるようになります。
+特定のコントローラでテーマを無効化したい場合は `$theme` に false を指定してください。
+
+```php
+class SomeController extends AppController
+{
+	public $theme = false;
+}
+```
+
+### bake するテーマの選択
+
+Theme プラグインをインストールすると、 bake は `Theme.name` で指定されているテーマてビューを作成するようになります。
+任意のテーマでビューを作成したい場合は、 `--theme` オプションを指定してください。
 
 ```
-1. Cake3
-2. default
-Which bake theme would you like to use? (1/2)
-[1] >
+cake bake view Users --theme default
+```
+
+有効な候補からテーマを選択したい場合は、 値を付けずに `--theme` オプションを指定してください。
+
+```sh
+cake bake view Users --theme
 ```
