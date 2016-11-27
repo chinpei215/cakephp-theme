@@ -1,6 +1,6 @@
 <?php
 foreach ($error->getTrace() as $i => $stack):
-    $excerpt = $params = [];
+    $excerpt = $params = array();
 
     if (isset($stack['file'], $stack['line'])):
         $excerpt = Debugger::excerpt($stack['file'], $stack['line'], 4);
