@@ -60,9 +60,8 @@ class ThemeShellTest extends CakeTestCase
 				$actual[$source] = $dest;
 			}));
 		$Shell->interactive = false;
-		$Shell->params['theme'] = 'Cake3';
 		$Shell->initialize();
-		$Shell->install();
+		$Shell->runCommand('install', array('install', '--theme', 'Cake3'));
 
 		$this->assertEquals($expected, $actual);
 	}
@@ -134,7 +133,7 @@ class ThemeShellTest extends CakeTestCase
 
 		$Shell->interactive = false;
 		$Shell->initialize();
-		$Shell->install();
+		$Shell->runCommand('install', array('install'));
 
 		$this->assertEquals($expected, $actual);
 	}

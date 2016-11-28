@@ -15,6 +15,7 @@ class ThemeShell extends AppShell
 					'options' => array(
 						'theme' => array(
 							'help' => 'Name of theme to be installed',
+							'default' => false,
 						),
 					),
 				),
@@ -29,32 +30,19 @@ class ThemeShell extends AppShell
 			return;
 		}
 
-		$default = Configure::read('Theme.default');
-
-		if (isset($this->params['theme']) && $this->params['theme'] !== $default) {
-				$default = false;
-		}
-
-		if ($default) {
-			$this->Template->params['theme'] = $default;
-		}
-
 		foreach ($this->Template->templatePaths as $key => $path) {
 			if (!is_dir($path . 'views' . DS . 'theme')) {
 				unset($this->Template->templatePaths[$key]);
 			}
 		}
 
-		$path = $this->Template->getThemePath();
-		$theme = basename($path);
-		$themePath = realpath($path) . DS . 'views' . DS . 'theme';
+		$themePath = $this->Template->getThemePath();
+		$theme = basename($themePath);
+		$themePath = realpath($themePath) . DS . 'views' . DS . 'theme';
 
-		$paths = App::path('View');
-		$viewPath = rtrim($paths[0], DS);
-		
-		if (!$default) {
-			$viewPath .= DS . 'Themed' . DS . $theme;
-		}
+		$viewPath = $this->View->getPath();
+		$viewPath = rtrim($viewPath, DS);
+		$default = (basename($viewPath) !== $theme);
 
 		$webroot = rtrim(Configure::read('App.www_root'), DS);
 

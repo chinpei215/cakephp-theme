@@ -12,7 +12,7 @@ class ThemeViewTask extends ViewTask
 		}
 
 		if ($theme && $theme !== 'default' && $theme !== Configure::read('Theme.default')) {
-			return $path . 'Themed' . DS . $theme . DS;
+			$path .= 'Themed' . DS . $theme . DS;
 		}
 
 		return $path;

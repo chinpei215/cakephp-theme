@@ -5,7 +5,7 @@ App::uses('AppController', 'Controller');
 class ThemeAppShell extends Shell
 {
 	public function initialize() {
-		if ($this instanceof BakeShell) {
+		if ($this instanceof BakeShell || $this instanceof ThemeShell) {
 			$this->tasks['View'] = array(
 				'className' => 'Theme.ThemeView',
 			);
@@ -14,25 +14,31 @@ class ThemeAppShell extends Shell
 	}
 
 	public function runCommand($command, $argv) {
-		if ($this instanceof BakeShell || $this instanceof ThemeShell) {
-			if ($argv) {
-				$task = $argv[0];
-				if ($this->hasTask($task)) {
-					$theme = Configure::read('Theme.default');
+		$auto = false;
 
-					if (!$theme) {
-						$vars = get_class_vars('AppController');
-						if (isset($vars['theme'])) {
-							$theme = $vars['theme'];
-						}
-					}
-
-					if ($theme) {
-						array_splice($argv, 1, 0, array('--theme', $theme));
-					}
-				}
+		if ($this instanceof ThemeShell) {
+			$auto = true;
+		} elseif ($this instanceof BakeShell) {
+			if ($argv && $this->hasTask($argv[0])) {
+				$auto = true;
 			}
 		}
+
+		if ($auto) {
+			$theme = Configure::read('Theme.default');
+
+			if (!$theme) {
+				$vars = get_class_vars('AppController');
+				if (isset($vars['theme'])) {
+					$theme = $vars['theme'];
+				}
+			}
+
+			if ($theme) {
+				array_splice($argv, 1, 0, array('--theme', $theme));
+			}
+		}
+
 		return parent::runCommand($command, $argv);
 	}
 }
