@@ -50,18 +50,9 @@ class AppShell extends ThemeAppShell {
 
 ## 基本的な使用方法
 
-### テーマのインストール
+### 使用するテーマの指定
 
-以下のコマンドを実行してテーマをインストールしてください。
-既定では **app/View/Themed** ディレクトリ配下に Cake3 テーマがコピーされます。
-
-```sh
-cake theme install
-```
-
-### テーマの有効化
-
-AppController でテーマを有効にします。
+AppController でテーマを有効にします。現在は `Cake3` のみが同梱されています。
 
 ```php
 class AppController extends Controller {
@@ -69,10 +60,19 @@ class AppController extends Controller {
 }
 ```
 
+### テーマのインストール
+
+以下のコマンドを実行してテーマをインストールしてください。
+`AppController` で指定したテーマが **app/View/Themed** ディレクトリ配下にインストールされます。
+
+```sh
+cake theme install
+```
+
 ### ビューの bake
 
-bake コマンドを実行して必要なビューを作成してください。
-既定では AppController で指定したテーマのビューを Themed ディレクトリ配下に作成します。
+必要に応じて bake コマンドを実行してビューを作成してください。
+`AppController` で指定したテーマのビューが **app/View/Themed** ディレクトリ配下に新たに作成されます。
 
 ```sh
 cake bake view Users
