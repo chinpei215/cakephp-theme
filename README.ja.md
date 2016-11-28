@@ -4,6 +4,8 @@
 
 Theme プラグインは CakePHP2 の標準の見栄えを CakePHP3 風に変更できる素敵なプラグインです。
 
+![Cake Theme](image.png)
+
 他の言語で読む: [English](README.md), **日本語**
 
 ## 必須環境
@@ -31,22 +33,22 @@ php composer.phar require chinpei215/cakephp-theme
 **app/Config/bootstrap.php** の中でプラグインを有効化してください。
 
 ```php
-CakePlugin::load('Theme', ['bootstrap' => true]);
+CakePlugin::load('Theme');
 ```
-
-テーマをコントローラに反映させるために `bootstrap` オプションには真を指定してください。
-Theme プラグインの bootstrap には、テーマを常に有効にするための設定が含まれています。
 
 ### ThemeAppShell の継承
 
 **app/Console/Commannd/AppShell.php** を変更して `AppShell` を `ThemeAppShell` の派生クラスに変更してください。
+この作業は `bake` が **app/View/Themed** 以下にファイルを作成できるようにするために必要です。
 
 ```php
-App::uses('ThemeAppShell', 'Theme.Console/Command');
+App::uses('ThemeAppShell', 'Theme.Console');
 
 class AppShell extends ThemeAppShell {
 }
 ```
+
+## 基本的な使用方法
 
 ### テーマのインストール
 
@@ -57,48 +59,64 @@ class AppShell extends ThemeAppShell {
 cake theme install
 ```
 
-もしも、テーマとしてインストールをするのではなく **app/View** および **app/webroot** を上書きしたい場合は、
-**app/Config/bootstrap.php** の中で `Theme.useThemePath` に偽を指定した後に上記のコマンドを実行してください。
+### テーマの有効化
+
+AppController でテーマを有効にします。
 
 ```php
-Configure::write('Theme.useThemePath', false);
+class AppController extends Controller {
+    public $theme = 'Cake3';
+}
 ```
 
 ### ビューの bake
 
 bake コマンドを実行して必要なビューを作成してください。
+既定では AppController で指定したテーマのビューを Themed ディレクトリ配下に作成します。
 
 ```sh
 cake bake view Users
 ```
 
-上述の `Theme.useThemePath` に偽が指定されていない限り、ビューは Themed ディレクトリ配下に作成されます。
-
 ## 高度な使用方法
 
-### テーマの無効化
+### 既定のテーマとしてインストール
 
-`Theme.useThemePath` が有効になっていると、コントローラの `$theme` プロパティが `null` の場合に、
-自動的に Cake3 テーマが設定されるようになります。
-特定のコントローラでテーマを無効化したい場合は `$theme` に false を指定してください。
+もし **app/View/Themed** 配下ではなく **app/View** および **app/webroot** を上書きしたい場合は、
+まず **app/Config/bootstrap.php** の中で `Theme.default` にテーマを指定してください。
 
 ```php
-class SomeController extends AppController
-{
-	public $theme = false;
-}
+Configure::write('Theme.default', 'Cake3');
+```
+
+次に、以下のコマンドを実行してテーマのインストールを行ってください。
+```sh
+cake theme install
+```
+
+この場合、 AppController でのテーマの有効化は不要です。
+
+### 独自テーマの作成
+
+**app/Console/Templates/views/theme** 以下に **app/View/Themed** と同じ構成でファイルを置くことで、
+独自テーマを作成することができます。
+プラグインの場合には **app/Plugin/PluginName/Console/Templates/views/theme** に置いてください。 
+
+作成した独自テーマは `theme install` コマンドでインストールできるようになります。
+
+```sh
+cake theme install --theme MyTheme
 ```
 
 ### bake するテーマの選択
 
-Theme プラグインをインストールすると、 bake は `Theme.name` で指定されているテーマてビューを作成するようになります。
 任意のテーマでビューを作成したい場合は、 `--theme` オプションを指定してください。
 
-```
-cake bake view Users --theme default
+```sh
+cake bake view Users --theme MyTheme
 ```
 
-有効な候補からテーマを選択したい場合は、 値を付けずに `--theme` オプションを指定してください。
+有効な候補からテーマを選択したい場合は、値を付けずに `--theme` オプションを指定してください。
 
 ```sh
 cake bake view Users --theme
