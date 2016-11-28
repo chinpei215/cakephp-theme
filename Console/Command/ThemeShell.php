@@ -30,6 +30,11 @@ class ThemeShell extends AppShell
 		}
 
 		$default = Configure::read('Theme.default');
+
+		if (isset($this->params['theme']) && $this->params['theme'] !== $default) {
+				$default = false;
+		}
+
 		if ($default) {
 			$this->Template->params['theme'] = $default;
 		}
@@ -55,6 +60,7 @@ class ThemeShell extends AppShell
 
 		$iter = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($themePath, FilesystemIterator::SKIP_DOTS));
 
+		$this->out(__d('theme', 'Installing theme: %s', [$theme]));
 		$result = null;
 		foreach ($iter as $file) {
 			$source = $file->getPathname();
@@ -66,11 +72,11 @@ class ThemeShell extends AppShell
 				$dest = $viewPath . $relativePath;
 			}
 
-			$this->out("Creating file $dest");
+			$this->out(__d('theme', 'Creating file: %s', [$dest]));
 
 			if ($result !== 'a' && file_exists($dest) && $this->interactive !== false) {
 				$this->out("File `$dest` exists");
-				$prompt = __d('cake_console', 'Do you want to overwrite?');
+				$prompt = __d('theme', 'Do you want to overwrite?');
 				$result = strtolower($this->in($prompt, array('y', 'n', 'a', 'q'), 'y'));
 				if ($result === 'q') {
 					break;
@@ -82,7 +88,7 @@ class ThemeShell extends AppShell
 			}
 
 			if ($this->copyFile($source, $dest)) {
-				$this->out("Wrote `$dest`");
+				$this->out(__d('theme', 'Wrote: %s', [$dest]));
 				$this->out('');
 			}
 		}
