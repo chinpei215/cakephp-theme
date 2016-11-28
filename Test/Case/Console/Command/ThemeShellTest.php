@@ -6,7 +6,7 @@ class ThemeShellTest extends CakeTestCase
 	public function testInstallToThemed() {
 		Configure::delete('Theme.default');
 
-		$source = realpath(App::pluginPath('Theme')) . DS . 'Console' . DS . 'Templates' . DS . 'Cake3' . DS . 'theme';
+		$source = realpath(App::pluginPath('Theme')) . DS . 'Console' . DS . 'Templates' . DS . 'Cake3' . DS . 'views' . DS . 'theme';
 		$dest = APP . 'View' . DS . 'Themed' . DS . 'Cake3';
 
 		$files = array(
@@ -60,7 +60,8 @@ class ThemeShellTest extends CakeTestCase
 				$actual[$source] = $dest;
 			}));
 		$Shell->interactive = false;
-		$Shell->args = array('Cake3');
+		$Shell->params['theme'] = 'Cake3';
+		$Shell->initialize();
 		$Shell->install();
 
 		$this->assertEquals($expected, $actual);
@@ -69,7 +70,7 @@ class ThemeShellTest extends CakeTestCase
 	public function testInstallToView() {
 		Configure::write('Theme.default', 'Cake3');
 
-		$source = realpath(App::pluginPath('Theme')) . DS . 'Console' . DS . 'Templates' . DS . 'Cake3' . DS . 'theme';
+		$source = realpath(App::pluginPath('Theme')) . DS . 'Console' . DS . 'Templates' . DS . 'Cake3' . DS . 'views' . DS . 'theme';
 		$dest = APP . 'View';
 
 		$expected = array();
@@ -130,7 +131,9 @@ class ThemeShellTest extends CakeTestCase
 			->will($this->returnCallback(function($source, $dest) use(&$actual){
 				$actual[$source] = $dest;
 			}));
+
 		$Shell->interactive = false;
+		$Shell->initialize();
 		$Shell->install();
 
 		$this->assertEquals($expected, $actual);

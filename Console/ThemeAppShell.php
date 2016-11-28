@@ -14,7 +14,7 @@ class ThemeAppShell extends Shell
 	}
 
 	public function runCommand($command, $argv) {
-		if ($this instanceof BakeShell) {
+		if ($this instanceof BakeShell || $this instanceof ThemeShell) {
 			if ($argv) {
 				$task = $argv[0];
 				if ($this->hasTask($task)) {
