@@ -11,7 +11,7 @@ class ThemeShell extends AppShell
 				'help' => 'Install theme',
 				'parser' => array(
 					'arguments' => array(
-						'name' => array(
+						'theme' => array(
 							'help' => 'Name of theme to be installed',
 						),
 					),
@@ -22,17 +22,29 @@ class ThemeShell extends AppShell
 	}
 
 	public function install() {
-		if ($this->args) {
-			list($name) = $this->args;
-		} else {
-			$name = Configure::read('Theme.name');
+		if (!$this instanceof ThemeAppShell) {
+			$this->err('<warning>AppShell must extend ThemeAppShell</warning>');
+			return;
 		}
 
-		$name = Inflector::camelize($name);
+		if (!isset($this->args[0])) {
+			$default = true;
+			$theme = Configure::read('Theme.default');
+			if (!$theme) {
+				$this->err('<warning>Theme.default is not configured</warning>');
+				return;
+			}
+		} else {
+			$theme = $this->args[0];
+			$default = false;
+		}
 
-		$themePath = dirname(__DIR__) . DS . 'Templates' . DS . $name . DS .'theme';
-		if (!is_dir($themePath)) {
-			$this->err(__d('theme', 'No such theme: %s', $name));
+		$theme = Inflector::camelize($theme);
+
+		$themePath = dirname(__DIR__) . DS . 'Templates' . DS . $theme . DS .'theme';
+
+		if (!$theme || !is_dir($themePath)) {
+			$this->err(__d('theme', '<warning>No such theme: %s</warning>', $theme));
 			return;
 		}
 		$themePath = realpath($themePath);
@@ -40,9 +52,8 @@ class ThemeShell extends AppShell
 		$paths = App::path('View');
 		$path = rtrim($paths[0], DS);
 		
-		$useThemePath = Configure::read('Theme.useThemePath');
-		if ($useThemePath) {
-			$path .= DS . 'Themed' . DS . $name;
+		if (!$default) {
+			$path .= DS . 'Themed' . DS . $theme;
 		}
 
 		$webroot = rtrim(Configure::read('App.www_root'), DS);
@@ -54,7 +65,7 @@ class ThemeShell extends AppShell
 			$source = $file->getPathname();
 			$relativePath = substr($source, strlen($themePath));
 
-			if (!$useThemePath && strpos($relativePath, DS . 'webroot' . DS) === 0) {
+			if ($default && strpos($relativePath, DS . 'webroot' . DS) === 0) {
 				$dest = $webroot . substr($relativePath, strlen('webroot' . DS));
 			} else {
 				$dest = $path . $relativePath;

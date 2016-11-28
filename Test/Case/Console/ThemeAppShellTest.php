@@ -1,5 +1,5 @@
 <?php
-App::uses('ThemeAppShell', 'Theme.Console/Command');
+App::uses('ThemeAppShell', 'Theme.Console');
 
 class BakeShell extends ThemeAppShell {
 	public function getOptionParser() {
@@ -14,9 +14,8 @@ class ThemeAppShellTest extends CakeTestCase
 	/**
 	 * @dataProvider dataProviderForTestBase
 	 */
-	public function testBake($class, $useThemePath, $expectedArgs, $expectedTasks) {
-		Configure::write('Theme.name', 'Cake3');
-		Configure::write('Theme.useThemePath', $useThemePath);
+	public function testBake($class, $default, $expectedArgs, $expectedTasks) {
+		Configure::write('Theme.default', $default);
 
 		$Shell = $this->getMockBuilder($class)
 			->setMethods(array('__get', 'startup'))
@@ -49,17 +48,17 @@ class ThemeAppShellTest extends CakeTestCase
 			array(
 				'BakeShell',
 				false,
-				array('--theme', 'Cake3'),
+				array(),
 				array(
 					'View' => array(
 						'class' => 'View',
-						'settings' => array(),
+						'settings' => array('className' => 'Theme.ThemeView'),
 					),
 				),
 			),
 			array(
 				'BakeShell',
-				true,
+				'Cake3',
 				array('--theme', 'Cake3'),
 				array(
 					'View' => array(
@@ -70,7 +69,7 @@ class ThemeAppShellTest extends CakeTestCase
 			),
 			array(
 				'Shell',
-				true,
+				null,
 				array(),
 				array(
 					'View' => array(

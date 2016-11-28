@@ -4,8 +4,7 @@ App::uses('ThemeShell', 'Theme.Console/Command');
 class ThemeShellTest extends CakeTestCase
 {
 	public function testInstallToThemed() {
-		Configure::write('Theme.name', 'Cake3');
-		Configure::write('Theme.useThemePath', true);
+		Configure::delete('Theme.default');
 
 		$source = realpath(App::pluginPath('Theme')) . DS . 'Console' . DS . 'Templates' . DS . 'Cake3' . DS . 'theme';
 		$dest = APP . 'View' . DS . 'Themed' . DS . 'Cake3';
@@ -61,14 +60,14 @@ class ThemeShellTest extends CakeTestCase
 				$actual[$source] = $dest;
 			}));
 		$Shell->interactive = false;
+		$Shell->args = array('Cake3');
 		$Shell->install();
 
 		$this->assertEquals($expected, $actual);
 	}
 
 	public function testInstallToView() {
-		Configure::write('Theme.name', 'Cake3');
-		Configure::write('Theme.useThemePath', false);
+		Configure::write('Theme.default', 'Cake3');
 
 		$source = realpath(App::pluginPath('Theme')) . DS . 'Console' . DS . 'Templates' . DS . 'Cake3' . DS . 'theme';
 		$dest = APP . 'View';

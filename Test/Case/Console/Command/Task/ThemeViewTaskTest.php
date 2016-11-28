@@ -8,17 +8,18 @@ class ThemeViewTaskTest extends CakeTestCase
 		$task = new ThemeViewTask();
 		$task->initialize();
 
-		Configure::write('Theme.name', 'Cake3');
-		Configure::write('Theme.useThemePath', true);
+		Configure::delete('Theme.default');
 		$task->params['theme'] = 'Cake3';
 		$expected = APP . 'View' . DS . 'Themed' . DS . 'Cake3' . DS;
 		$this->assertEquals($expected, $task->getPath());
 
-		Configure::write('Theme.useThemePath', false);
+		$task->params['theme'] = 'default';
 		$expected = APP . 'View' . DS;
 		$this->assertEquals($expected, $task->getPath());
 
-		$task->params['theme'] = 'default';
+		Configure::write('Theme.default', 'Cake3');
+		$task->params['theme'] = 'Cake3';
+		$expected = APP . 'View' . DS;
 		$this->assertEquals($expected, $task->getPath());
 	}
 }
