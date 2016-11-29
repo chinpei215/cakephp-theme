@@ -10,15 +10,16 @@ class ThemeShell extends AppShell
 		$parser = parent::getOptionParser();
 
 		$parser->addSubcommand('install', array(
-				'help' => 'Install theme',
-				'parser' => array(
-					'options' => array(
-						'theme' => array(
-							'help' => 'Name of theme to be installed',
-							'default' => false,
-						),
+			'help' => 'Install theme.',
+			'parser' => array(
+				'options' => array(
+					'theme' => array(
+						'short' => 't',
+						'help' => 'Name of theme to be installed',
+						'default' => false,
 					),
 				),
+			),
 		));
 
 		return $parser;
