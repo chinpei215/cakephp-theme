@@ -49,7 +49,7 @@ class ThemeShell extends AppShell
 
 		$iter = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($themePath, FilesystemIterator::SKIP_DOTS));
 
-		$this->out(__d('theme', 'Installing theme: %s', [$theme]));
+		$this->out(__d('theme', 'Installing theme: %s', array($theme)));
 		$result = null;
 		foreach ($iter as $file) {
 			$source = $file->getPathname();
@@ -61,7 +61,7 @@ class ThemeShell extends AppShell
 				$dest = $viewPath . $relativePath;
 			}
 
-			$this->out(__d('theme', 'Creating file: %s', [$dest]));
+			$this->out(__d('theme', 'Creating file: %s', array($dest)));
 
 			if ($result !== 'a' && file_exists($dest) && $this->interactive !== false) {
 				$this->out("File `$dest` exists");
@@ -77,7 +77,7 @@ class ThemeShell extends AppShell
 			}
 
 			if ($this->copyFile($source, $dest)) {
-				$this->out(__d('theme', 'Wrote: %s', [$dest]));
+				$this->out(__d('theme', 'Wrote: %s', array($dest)));
 				$this->out('');
 			}
 		}
