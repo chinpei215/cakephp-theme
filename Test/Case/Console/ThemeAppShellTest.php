@@ -1,82 +1,81 @@
 <?php
 App::uses('ThemeAppShell', 'Theme.Console');
-
-class BakeShell extends ThemeAppShell {
-	public function getOptionParser() {
-		$parser = parent::getOptionParser();
-		$parser->addOption('theme');
-		return $parser;
-	}
-}
+App::uses('ThemeShell', 'Theme.Console/Command');
+App::uses('BakeShell', 'Console/Command');
+App::uses('ConsoleOptionParser', 'Console');
 
 class ThemeAppShellTest extends CakeTestCase
 {
+	public $theme = 'TestTheme';
+
 	/**
-	 * @dataProvider dataProviderForTestBase
+	 * @dataProvider dataProviderForTestBakeView
 	 */
-	public function testBake($class, $default, $expectedArgs, $expectedTasks) {
+	public function testBakeView($class, $command, $default, $defaultClass, $expectedTask, $expectedTheme) {
 		Configure::write('Theme.default', $default);
+		Configure::write('Theme.defaultClass', $defaultClass);
 
 		$Shell = $this->getMockBuilder($class)
-			->setMethods(array('__get', 'startup'))
+			->setMethods(array('startup', 'getOptionParser'))
 			->getMock();
 
-		$Shell->tasks = array('View');
-
-		$View = $this->getMockBuilder('Shell')
-			->setMethods(array('runCommand'))
-			->getMock();
-
-		$Shell->expects($this->once())
-			->method('__get')
-			->with('View')
-			->will($this->returnValue($View));
-
-		$View->expects($this->once())
-			->method('runCommand')
-			->with('execute', $expectedArgs);
+		$Shell->tasks[] = 'View';
 
 		$Shell->initialize();
 
-		$this->assertAttributeEquals($expectedTasks, '_taskMap', $Shell);
+		$this->assertEquals($expectedTask, get_class($Shell->View));
+
+		$Shell->View = $this->getMockBuilder($expectedTask)
+			->setMethods(array('execute'))
+			->getMock();
+
+		$Shell->View->expects($this->once())
+			->method('execute');
+		$parser = new ConsoleOptionParser();
+		$parser->addSubcommand('view', array(
+			'parser' => array(
+				'options' => array(
+					'theme' => array(
+						'short' => 't',
+					),
+				),
+			),
+		));
+		$Shell->expects($this->once())
+			->method('getOptionParser')
+			->will($this->returnValue($parser));
 
 		$Shell->runCommand('view', array('view'));
+
+		$theme =& $Shell->View->params['theme'];
+		$this->assertEquals($expectedTheme, $theme);
 	}
 
-	public function dataProviderForTestBase() {
+	public function dataProviderForTestBakeView() {
 		return array(
 			array(
-				'BakeShell',
-				false,
-				array(),
-				array(
-					'View' => array(
-						'class' => 'View',
-						'settings' => array('className' => 'Theme.ThemeView'),
-					),
-				),
+				'BakeShell', 'view', null, 'stdClass',
+				'ThemeViewTask', null,
 			),
 			array(
-				'BakeShell',
-				'Cake3',
-				array('--theme', 'Cake3'),
-				array(
-					'View' => array(
-						'class' => 'View',
-						'settings' => array('className' => 'Theme.ThemeView'),
-					),
-				),
+				'BakeShell', 'view', 'Cake3', 'stdClass',
+				'ThemeViewTask', 'Cake3',
 			),
 			array(
-				'Shell',
-				null,
-				array(),
-				array(
-					'View' => array(
-						'class' => 'View',
-						'settings' => array(),
-					),
-				),
+				'BakeShell', 'view', 'Cake3', 'ThemeAppShellTest',
+				'ThemeViewTask', 'Cake3',
+			),
+			array(
+				'BakeShell', 'view', null, 'ThemeAppShellTest',
+				'ThemeViewTask', 'TestTheme',
+			),
+			array(
+				'ThemeShell', 'install', 'Cake3', 'stdClass',
+				'ThemeViewTask', 'Cake3',
+			),
+			array(
+				'Shell', 'view', 'Cake3', 'ThemeAppShellTest',
+				'ViewTask', null,
 			),
 		);
 	}

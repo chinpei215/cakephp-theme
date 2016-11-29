@@ -3,56 +3,34 @@ App::uses('ThemeShell', 'Theme.Console/Command');
 
 class ThemeShellTest extends CakeTestCase
 {
-	public function testInstallToThemed() {
-		Configure::delete('Theme.default');
+	public $theme = 'Test1';
 
-		$source = realpath(App::pluginPath('Theme')) . DS . 'Console' . DS . 'Templates' . DS . 'Cake3' . DS . 'views' . DS . 'theme';
-		$dest = APP . 'View' . DS . 'Themed' . DS . 'Cake3';
+	public function setUp() {
+		App::build(array(
+			'Console' => array(App::pluginPath('Theme') . DS . 'Test' . DS . 'test_app' . DS . 'Console' . DS),
+		));
+	}
 
-		$files = array(
-			'Elements' . DS . 'exception_stack_trace.ctp',
-			'Elements' . DS . 'exception_stack_trace_nav.ctp',
-			'Elements' . DS . 'Flash' . DS . 'default.ctp',
-			'Elements' . DS . 'Flash' . DS . 'error.ctp',
-			'Elements' . DS . 'Flash' . DS . 'success.ctp',
-			'Errors' . DS . 'error400.ctp',
-			'Errors' . DS . 'error500.ctp',
-			'Errors' . DS . 'fatal_error.ctp',
-			'Errors' . DS . 'missing_action.ctp',
-			'Errors' . DS . 'missing_behavior.ctp',
-			'Errors' . DS . 'missing_component.ctp',
-			'Errors' . DS . 'missing_connection.ctp',
-			'Errors' . DS . 'missing_controller.ctp',
-			'Errors' . DS . 'missing_database.ctp',
-			'Errors' . DS . 'missing_datasource.ctp',
-			'Errors' . DS . 'missing_datasource_config.ctp',
-			'Errors' . DS . 'missing_helper.ctp',
-			'Errors' . DS . 'missing_layout.ctp',
-			'Errors' . DS . 'missing_plugin.ctp',
-			'Errors' . DS . 'missing_table.ctp',
-			'Errors' . DS . 'missing_view.ctp',
-			'Errors' . DS . 'pdo_error.ctp',
-			'Errors' . DS . 'private_action.ctp',
-			'Layouts' .  DS . 'default.ctp',
-			'Layouts' .  DS . 'dev_error.ctp',
-			'Pages' . DS . 'home.ctp',
-			'Scaffolds' . DS . 'form.ctp',
-			'Scaffolds' . DS . 'index.ctp',
-			'Scaffolds' . DS . 'view.ctp',
-			'webroot' . DS . 'css' . DS . 'base.css',
-			'webroot' . DS . 'css' . DS . 'cake.css',
-			'webroot' . DS . 'img' . DS . 'cake-logo.png',
-		);
+	/**
+	 * @dataProvider dataProviderForTestInstall
+	 */
+	public function testInstall($argv, $default, $defaultClass, $expectedFiles) {
+		Configure::write('Theme.default', $default);
+		Configure::write('Theme.defaultClass', $defaultClass);
+
+		$base = realpath(App::pluginPath('Theme')) . '/Test/test_app/Console/Templates/';
 
 		$expected = array();
-		foreach ($files as $file) {
-			$expected[ $source . DS . $file ] = $dest . DS . $file;
+		foreach ($expectedFiles as $source => $dist) {
+			$source = str_replace('/', DS, $base . $source);
+			$dist = str_replace('/', DS, $dist);
+			$expected[$source] = $dist;
 		}
 
 		$actual = array();
 
 		$Shell = $this->getMockBuilder('ThemeShell')
-			->setMethods(array('copyFile', 'out'))
+			->setMethods(array('copyFile', 'out', 'in'))
 			->getMock();
 		$Shell->expects($this->any())
 			->method('copyFile')
@@ -61,80 +39,55 @@ class ThemeShellTest extends CakeTestCase
 			}));
 		$Shell->interactive = false;
 		$Shell->initialize();
-		$Shell->runCommand('install', array('install', '--theme', 'Cake3'));
+		$Shell->runCommand('install', array_merge(array('install'), $argv));
 
 		$this->assertEquals($expected, $actual);
 	}
 
-	public function testInstallToView() {
-		Configure::write('Theme.default', 'Cake3');
-
-		$source = realpath(App::pluginPath('Theme')) . DS . 'Console' . DS . 'Templates' . DS . 'Cake3' . DS . 'views' . DS . 'theme';
-		$dest = APP . 'View';
-
-		$expected = array();
-
-		$files = array(
-			'Elements' . DS . 'exception_stack_trace.ctp',
-			'Elements' . DS . 'exception_stack_trace_nav.ctp',
-			'Elements' . DS . 'Flash' . DS . 'default.ctp',
-			'Elements' . DS . 'Flash' . DS . 'error.ctp',
-			'Elements' . DS . 'Flash' . DS . 'success.ctp',
-			'Errors' . DS . 'error400.ctp',
-			'Errors' . DS . 'error500.ctp',
-			'Errors' . DS . 'fatal_error.ctp',
-			'Errors' . DS . 'missing_action.ctp',
-			'Errors' . DS . 'missing_behavior.ctp',
-			'Errors' . DS . 'missing_component.ctp',
-			'Errors' . DS . 'missing_connection.ctp',
-			'Errors' . DS . 'missing_controller.ctp',
-			'Errors' . DS . 'missing_database.ctp',
-			'Errors' . DS . 'missing_datasource.ctp',
-			'Errors' . DS . 'missing_datasource_config.ctp',
-			'Errors' . DS . 'missing_helper.ctp',
-			'Errors' . DS . 'missing_layout.ctp',
-			'Errors' . DS . 'missing_plugin.ctp',
-			'Errors' . DS . 'missing_table.ctp',
-			'Errors' . DS . 'missing_view.ctp',
-			'Errors' . DS . 'pdo_error.ctp',
-			'Errors' . DS . 'private_action.ctp',
-			'Layouts' .  DS . 'default.ctp',
-			'Layouts' .  DS . 'dev_error.ctp',
-			'Pages' . DS . 'home.ctp',
-			'Scaffolds' . DS . 'form.ctp',
-			'Scaffolds' . DS . 'index.ctp',
-			'Scaffolds' . DS . 'view.ctp',
+	public function dataProviderForTestInstall() {
+		return array(
+			array(
+				array('--theme', 'Test1'), null, 'stdClass',
+				array(
+					'Test1/views/theme/Tests/test1.ctp' => APP . 'View/Themed/Test1/Tests/test1.ctp',
+					'Test1/views/theme/webroot/test1.css' => APP . 'View/Themed/Test1/webroot/test1.css',
+				),
+			),
+			array(
+				array(), null, 'ThemeShellTest',
+				array(
+					'Test1/views/theme/Tests/test1.ctp' => APP . 'View/Themed/Test1/Tests/test1.ctp',
+					'Test1/views/theme/webroot/test1.css' => APP . 'View/Themed/Test1/webroot/test1.css',
+				),
+			),
+			array(
+				array(), 'Test1', 'stdClass',
+				array(
+					'Test1/views/theme/Tests/test1.ctp' => APP . 'View/Tests/test1.ctp',
+					'Test1/views/theme/webroot/test1.css' => APP . 'webroot/test1.css',
+				),
+			),
+			array(
+				array(), 'Test2', 'ThemeShellTest',
+				array(
+					'Test2/views/theme/Tests/test2.ctp' => APP . 'View/Tests/test2.ctp',
+					'Test2/views/theme/webroot/test2.css' => APP . 'webroot/test2.css',
+				),
+			),
+			array(
+				array('--theme', 'Test2'), 'Test2', 'stdClass',
+				array(
+					'Test2/views/theme/Tests/test2.ctp' => APP . 'View/Tests/test2.ctp',
+					'Test2/views/theme/webroot/test2.css' => APP . 'webroot/test2.css',
+				),
+			),
+			array(
+				array('--theme', 'Test2'), 'Test1', 'stdClass',
+				array(
+					'Test2/views/theme/Tests/test2.ctp' => APP . 'View/Themed/Test2/Tests/test2.ctp',
+					'Test2/views/theme/webroot/test2.css' => APP . 'View/Themed/Test2/webroot/test2.css',
+				),
+			),
 		);
-
-		foreach ($files as $file) {
-			$expected[ $source . DS . $file ] = $dest . DS . $file;
-		}
-
-		$files = array(
-			'webroot' . DS . 'css' . DS . 'base.css',
-			'webroot' . DS . 'css' . DS . 'cake.css',
-			'webroot' . DS . 'img' . DS . 'cake-logo.png',
-		);
-
-		foreach ($files as $file) {
-			$expected[ $source . DS . $file ] = APP . $file;
-		}
-
-		$actual = array();
-
-		$Shell = $this->getMockBuilder('ThemeShell')
-			->setMethods(array('copyFile', 'out'))
-			->getMock();
-		$Shell->expects($this->any())
-			->method('copyFile')
-			->will($this->returnCallback(function($source, $dest) use(&$actual){
-				$actual[$source] = $dest;
-			}));
-
-		$Shell->interactive = false;
-		$Shell->initialize();
-		$Shell->runCommand('install', array('install'));
-
-		$this->assertEquals($expected, $actual);
 	}
 }
