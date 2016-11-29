@@ -14,21 +14,12 @@ class ThemeAppShell extends Shell
 	}
 
 	public function runCommand($command, $argv) {
-		$auto = false;
-
-		if ($this instanceof ThemeShell) {
-			$auto = true;
-		} elseif ($this instanceof BakeShell) {
-			if ($argv && $this->hasTask($argv[0])) {
-				$auto = true;
-			}
-		}
-
-		if ($auto) {
+		if ($this instanceof BakeShell || $this instanceof ThemeShell) {
 			$theme = Configure::read('Theme.default');
 
 			if (!$theme) {
-				$vars = get_class_vars('AppController');
+				$class = Configure::read('Theme.defaultClass') ?: 'AppController';
+				$vars = get_class_vars($class);
 				if (isset($vars['theme'])) {
 					$theme = $vars['theme'];
 				}
@@ -38,7 +29,6 @@ class ThemeAppShell extends Shell
 				array_splice($argv, 1, 0, array('--theme', $theme));
 			}
 		}
-
 		return parent::runCommand($command, $argv);
 	}
 }
